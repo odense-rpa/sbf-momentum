@@ -58,8 +58,43 @@ def tilføj_sagsbehandlere_til_forælder(data):
     return unikke_sagsbehandlere
 
 def inaktiver_sagsbehandlere_til_forælder(data):
+    # 1. Find unikke sagsbehandlere fra input
     unikke_sagsbehandlere = find_unikke_sagsbehandlere(data)
-    # TODO: Implementer logik til at inaktivere sagsbehandlere
+
+    # 2. Hent borger
+    borger = momentum.borgere.hent_borger(data["cpr"])
+
+    # 3. Hent borgerens aktive sagsbehandlere
+    aktive = momentum.borgere.hent_aktive_sagsbehandlere(borger)["data"]
+
+    # 4. Set med emails fra momentum (de aktive)
+    aktive_emails = { sb["email"] for sb in aktive }
+
+    # 5. Fjern de unikke sagsbehandlere som allerede er aktive
+    for sb in unikke_sagsbehandlere:
+        email = sb["email"]
+        if email in aktive_emails:
+            momentum.borgere.fjern_ansvarlig_eller_privat_kontaktperson(
+                borger,
+                email
+            )
+    
+    aktive = momentum.borgere.hent_aktive_sagsbehandlere(borger)["data"]
+    # kig aktive igennem. Hvis der ikke er nogle med responsibilityTypeName "DUBU-sagsbehandler" eller 
+    # "Nexus-sagsbehandler", så fjern markering - TODO: find ud af hvilken markering
+    target_types = {"DUBU-sagsbehandler", "Nexus-sagsbehandler"}
+
+    har_relevant_sagsbehandler = any(
+        sb.get("responsibilityTypeName") in target_types
+        for sb in aktive
+    )
+
+    if not har_relevant_sagsbehandler:
+        # TODO: indsæt korrekt fjern-markering-kald når du ved hvilken markering
+        # momentum.borgere.fjern_markering(borger)
+        pass
+
+    print("hej")
 
 def find_unikke_sagsbehandlere(data) -> list:
     """Tæl antal af unikke sagsbehandlere i data."""
@@ -106,7 +141,7 @@ async def process_workqueue(workqueue: Workqueue):
                     tilføj_sagsbehandlere_til_forælder(data)
                 else:
                     inaktiver_sagsbehandlere_til_forælder(data)
-
+                    
                 # hent borger i momentum via cpr:
                 borger = momentum.borgere.hent_borger(data["cpr"])
                 borgers_sagsbehandlere = momentum.borgere.hent_aktive_sagsbehandlere(borger)
