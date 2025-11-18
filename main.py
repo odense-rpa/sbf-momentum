@@ -82,14 +82,14 @@ def inaktiver_sagsbehandlere_til_forælder(data):
     aktive = momentum.borgere.hent_aktive_sagsbehandlere(borger)["data"]
     # kig aktive igennem. Hvis der ikke er nogle med responsibilityTypeName "DUBU-sagsbehandler" eller 
     # "Nexus-sagsbehandler", så fjern markering - TODO: find ud af hvilken markering
-    target_types = {"DUBU-sagsbehandler", "Nexus-sagsbehandler"}
+    ekstern_sagsbehandler_typer = {"DUBU-sagsbehandler", "Nexus-sagsbehandler"}
 
-    har_relevant_sagsbehandler = any(
-        sb.get("responsibilityTypeName") in target_types
+    har_relevant_ekstern_sagsbehandler = any(
+        sb.get("responsibilityTypeName") in ekstern_sagsbehandler_typer
         for sb in aktive
     )
 
-    if not har_relevant_sagsbehandler:
+    if not har_relevant_ekstern_sagsbehandler:
         # TODO: indsæt korrekt fjern-markering-kald når du ved hvilken markering
         # momentum.borgere.fjern_markering(borger)
         pass
