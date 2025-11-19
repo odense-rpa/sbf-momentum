@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+from datetime import datetime
 
 from automation_server_client import AutomationServer, Workqueue, WorkItemError, Credential
 from momentum_client.manager import MomentumClientManager
@@ -15,6 +16,20 @@ def tilføj_sagsbehandlere_til_forælder(data):
     borger = momentum.borgere.hent_borger(data["cpr"])
     borgers_sagsbehandlere = momentum.borgere.hent_aktive_sagsbehandlere(borger)
     borgers_private_kontaktpersoner = momentum.borgere.hent_alle_private_kontaktpersoner(borger)
+    borgers_markeringer = momentum.borgere.hent_markeringer(borger)
+
+    # Check om borger har markering <navn mangler>
+    har_borger_markering_navn_mangler = next(
+        (m for m in borgers_markeringer if m["tag"]["title"] == "Navn mangler" and m["tag"]["end"] is None),
+        None
+    )
+    if har_borger_markering_navn_mangler is None:
+        momentum.borgere.opret_markering(
+            borger=borger,
+            markeringsnavn="Navn mangler",
+            start_dato=datetime.now().date(),
+        )
+
     # Check om unikke_sagsbehandlere allerede er tilknyttet borger
     for sagsbehandler in unikke_sagsbehandlere:
         if sagsbehandler["email"] not in [bsb["email"] for bsb in borgers_sagsbehandlere["data"]]:
@@ -91,7 +106,12 @@ def inaktiver_sagsbehandlere_til_forælder(data):
 
     if not har_relevant_ekstern_sagsbehandler:
         # TODO: indsæt korrekt fjern-markering-kald når du ved hvilken markering
-        # momentum.borgere.fjern_markering(borger)
+        borgers_markeringer = momentum.borgere.hent_markeringer(borger)
+        navn_mangler_markering = next((m for m in borgers_markeringer if m['tag']['title'] == "Navn mangler" and m['tag']['end'] is None), None)
+        if navn_mangler_markering:
+            momentum.borgere.afslut_markering(
+                navn_mangler_markering, datetime.datetime.today()
+            )
         pass
 
     print("hej")
