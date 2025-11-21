@@ -18,15 +18,15 @@ def tilføj_sagsbehandlere_til_forælder(data):
     borgers_private_kontaktpersoner = momentum.borgere.hent_alle_private_kontaktpersoner(borger)
     borgers_markeringer = momentum.borgere.hent_markeringer(borger)
 
-    # Check om borger har markering <navn mangler>
-    har_borger_markering_navn_mangler = next(
-        (m for m in borgers_markeringer if m["tag"]["title"] == "Navn mangler" and m["tag"]["end"] is None),
+    # Check om borger har markering "Sammenhængende borgerforløb"
+    sammenhængende_borgerforløb_markering = next(
+        (m for m in borgers_markeringer if m["tag"]["title"] == "Sammenhængende borgerforløb" and m["tag"]["end"] is None),
         None
     )
-    if har_borger_markering_navn_mangler is None:
+    if sammenhængende_borgerforløb_markering is None:
         momentum.borgere.opret_markering(
             borger=borger,
-            markeringsnavn="Navn mangler",
+            markeringsnavn="Sammenhængende borgerforløb",
             start_dato=datetime.now().date(),
         )
 
@@ -96,7 +96,7 @@ def inaktiver_sagsbehandlere_til_forælder(data):
     
     aktive = momentum.borgere.hent_aktive_sagsbehandlere(borger)["data"]
     # kig aktive igennem. Hvis der ikke er nogle med responsibilityTypeName "DUBU-sagsbehandler" eller 
-    # "Nexus-sagsbehandler", så fjern markering - TODO: find ud af hvilken markering
+    # "Nexus-sagsbehandler", så fjern markering
     ekstern_sagsbehandler_typer = {"DUBU-sagsbehandler", "Nexus-sagsbehandler"}
 
     har_relevant_ekstern_sagsbehandler = any(
@@ -105,12 +105,11 @@ def inaktiver_sagsbehandlere_til_forælder(data):
     )
 
     if not har_relevant_ekstern_sagsbehandler:
-        # TODO: indsæt korrekt fjern-markering-kald når du ved hvilken markering
         borgers_markeringer = momentum.borgere.hent_markeringer(borger)
-        navn_mangler_markering = next((m for m in borgers_markeringer if m['tag']['title'] == "Navn mangler" and m['tag']['end'] is None), None)
-        if navn_mangler_markering:
+        sammenhængende_borgerforløb_markering = next((m for m in borgers_markeringer if m['tag']['title'] == "Sammenhængende borgerforløb" and m['tag']['end'] is None), None)
+        if sammenhængende_borgerforløb_markering:
             momentum.borgere.afslut_markering(
-                navn_mangler_markering, datetime.datetime.today()
+                sammenhængende_borgerforløb_markering, datetime.datetime.today()
             )
         pass
 
