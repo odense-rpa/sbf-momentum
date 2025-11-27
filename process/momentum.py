@@ -65,11 +65,11 @@ class MomentumService:
                 )
 
     def find_unikke_sagsbehandlere(self, data) -> list:
-        """Tæl antal af unikke sagsbehandlere i data."""
+        """Find unikke sagsbehandlere blandt aktive børn."""
         unikke_sagsbehandlere = []
         seen_emails = set()
         børn = data.get("børn", [])
-        # lambda til at fjerne alle børn hvor aktiv er False:
+        # Filtrer kun aktive børn
         børn = [x for x in børn if x.get("aktiv", True)]
 
         for barn in børn:
@@ -79,9 +79,6 @@ class MomentumService:
                 if email not in seen_emails:
                     unikke_sagsbehandlere.append(sagsbehandler)
                     seen_emails.add(email)
-
-        print(f"Antal børn: {len(børn)}")
-        print(f"Antal unikke sagsbehandlere: {len(unikke_sagsbehandlere)}")
 
         return unikke_sagsbehandlere
 
@@ -102,7 +99,6 @@ class MomentumService:
                 self.momentum.borgere.fjern_ansvarlig_eller_privat_kontaktperson(
                     borger, eksisterende_sagsbehandler["email"]
                 )
-                print(eksisterende_sagsbehandler)
 
     def tilføj_unikke_sagsbehandlere(self, borger: dict, data: dict):
         # Check om unikke_sagsbehandlere allerede er tilknyttet borger
@@ -148,7 +144,6 @@ class MomentumService:
                         for bpk in borgers_private_kontaktpersoner["data"]
                         if bpk["email"]["address"] == sagsbehandler["email"]
                     )
-                    print(f"{sagsbehandler['system']}-sagsbehandler")
                     self.momentum.borgere.opdater_borgers_ansvarlige_og_kontaktpersoner(
                         privat_kontaktperson=True,
                         borger=borger,

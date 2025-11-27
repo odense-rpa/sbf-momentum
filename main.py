@@ -34,11 +34,12 @@ async def process_workqueue(workqueue: Workqueue):
             data = item.data  # Item data deserialized from json as dict
 
             try:
-                # tæl antal aktive børn
+                borger = momentum.borgere.hent_borger(data["cpr"])
+
+                # Check om forælder er aktiv og har aktive børn
                 aktive_børn_antal = sum(
                     1 for item in data.get("børn", []) if item.get("aktiv")
                 )
-                borger = momentum.borgere.hent_borger(data["cpr"])
 
                 if data["aktiv"] and aktive_børn_antal > 0:
                     # synkroniser_sagsbehandlere
@@ -50,14 +51,8 @@ async def process_workqueue(workqueue: Workqueue):
                     momentum_service.synkroniser_markering(borger=borger)
                 else:
                     momentum_service.inaktiver_sagsbehandlere_til_forælder(data)
-                    # afslut_markering
                     momentum_service.afslut_markering(borger=borger)
 
-                # hent borger i momentum via cpr:
-                borgers_sagsbehandlere = momentum.borgere.hent_aktive_sagsbehandlere(
-                    borger
-                )
-                print(borgers_sagsbehandlere)
             except WorkItemError as e:
                 # A WorkItemError represents a soft error that indicates the item should be passed to manual processing or a business logic fault
                 logger.error(f"Error processing item: {data}. Error: {e}")
