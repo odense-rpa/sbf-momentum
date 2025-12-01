@@ -75,6 +75,10 @@ class MomentumService:
         for barn in børn:
             sagsbehandlere = barn.get("sagsbehandler", [])
             for sagsbehandler in sagsbehandlere:
+
+                if not sagsbehandler.get("telefon"): # Hvis telefonnummer ikke er angivet, sæt til "00000000"
+                    sagsbehandler["telefon"] = "00000000"
+
                 email = sagsbehandler.get("email", "")
                 if email not in seen_emails:
                     unikke_sagsbehandlere.append(sagsbehandler)
