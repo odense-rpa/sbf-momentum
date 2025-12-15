@@ -2,7 +2,7 @@ from datetime import datetime
 from momentum_client.manager import MomentumClientManager
 from odk_tools.tracking import Tracker
 
-proces_navn = "sbf-momentum"
+proces_navn = "SBF Momentum"
 
 
 class MomentumService:
@@ -155,6 +155,8 @@ class MomentumService:
                         medarbejderrolle=f"{sagsbehandler['system']}-sagsbehandler",
                     )
 
+        self.tracker.track_task(process_name=proces_navn)
+
     def inaktiver_sagsbehandlere_til_forælder(self, data: dict):
         # 1. Find unikke sagsbehandlere fra input
         unikke_sagsbehandlere = self.find_unikke_sagsbehandlere(data)
@@ -175,3 +177,7 @@ class MomentumService:
                 self.momentum.borgere.fjern_ansvarlig_eller_privat_kontaktperson(
                     borger, email
                 )
+
+        # 6. Log processen
+        self.tracker.track_task(process_name=proces_navn)
+
