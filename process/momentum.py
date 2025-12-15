@@ -114,12 +114,16 @@ class MomentumService:
         )
 
         unikke_sagsbehandlere = self.find_unikke_sagsbehandlere(data)
+        afregn_opgave = False
         for sagsbehandler in unikke_sagsbehandlere:
             if sagsbehandler["email"] not in [
                 bsb["email"] for bsb in borgers_sagsbehandlere["data"]
             ]:
                 if sagsbehandler["system"] == "Dubu":
                     sagsbehandler["system"] = sagsbehandler["system"].upper()
+
+                # Sæt afregn_opgave til True hvis der tilføjes en sagsbehandler
+                afregn_opgave = True
 
                 # Check om sagsbehandler allerede er oprettet som privat kontaktperson
                 if sagsbehandler["email"] not in [
@@ -155,7 +159,8 @@ class MomentumService:
                         medarbejderrolle=f"{sagsbehandler['system']}-sagsbehandler",
                     )
 
-        self.tracker.track_task(process_name=proces_navn)
+        if afregn_opgave:
+            self.tracker.track_task(process_name=proces_navn)
 
     def inaktiver_sagsbehandlere_til_forælder(self, data: dict):
         # 1. Find unikke sagsbehandlere fra input
@@ -171,13 +176,15 @@ class MomentumService:
         aktive_emails = {sb["email"] for sb in aktive}
 
         # 5. Fjern de unikke sagsbehandlere som allerede er aktive
+        afregn_opgave = False
         for sb in unikke_sagsbehandlere:
             email = sb["email"]
             if email in aktive_emails:
                 self.momentum.borgere.fjern_ansvarlig_eller_privat_kontaktperson(
                     borger, email
                 )
+                afregn_opgave = True
 
         # 6. Log processen
-        self.tracker.track_task(process_name=proces_navn)
-
+        if afregn_opgave:
+            self.tracker.track_task(process_name=proces_navn)
