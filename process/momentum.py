@@ -49,19 +49,22 @@ class MomentumService:
         )
 
         if not har_relevant_ekstern_sagsbehandler:
+            markering_navne = {
+                "Sammenhængende borgerforløb",
+                "Sammenhængende borgerforløb - afventer samtykke",
+                "Sammenhængende borgerforløb - deltager IKKE",
+                "Sammenhængende borgerforløb - deltager",
+            }
+            
             borgers_markeringer = self.momentum.borgere.hent_markeringer(borger)
-            sammenhængende_borgerforløb_markering = next(
-                (
-                    m
-                    for m in borgers_markeringer
-                    if m["tag"]["title"] == "Sammenhængende borgerforløb"
-                    and m["tag"]["end"] is None
-                ),
-                None,
-            )
-            if sammenhængende_borgerforløb_markering:
+            aktive_relevante_markeringer = [
+                m for m in borgers_markeringer
+                if m["tag"]["title"] in markering_navne and m["tag"]["end"] is None
+            ]
+            
+            for markering in aktive_relevante_markeringer:
                 self.momentum.borgere.afslut_markering(
-                    sammenhængende_borgerforløb_markering, datetime.now().date()
+                    markering, datetime.now().date()
                 )
 
     def find_unikke_sagsbehandlere(self, data) -> list:
