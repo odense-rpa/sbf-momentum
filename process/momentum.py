@@ -101,8 +101,8 @@ class MomentumService:
             if eksisterende_sagsbehandler[
                 "email"
             ] not in unikke_emails and eksisterende_sagsbehandler.get(
-                "responsibilityTypeName"
-            ) in ["Dubu-sagsbehandler", "Nexus-sagsbehandler"]:
+                "responsibilityTypeName", ""
+            ).lower() in ["dubu-sagsbehandler", "nexus-sagsbehandler"]:
                 self.momentum.borgere.fjern_ansvarlig_eller_privat_kontaktperson(
                     borger, eksisterende_sagsbehandler["email"]
                 )
