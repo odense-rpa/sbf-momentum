@@ -98,11 +98,10 @@ class MomentumService:
 
         unikke_emails = [s["email"] for s in unikke_sagsbehandlere]
         for eksisterende_sagsbehandler in borgers_sagsbehandlere["data"]:
+            responsibility = (eksisterende_sagsbehandler.get("responsibilityTypeName") or "").lower()
             if eksisterende_sagsbehandler[
                 "email"
-            ] not in unikke_emails and eksisterende_sagsbehandler.get(
-                "responsibilityTypeName", ""
-            ).lower() in ["dubu-sagsbehandler", "nexus-sagsbehandler"]:
+            ] not in unikke_emails and responsibility in ["dubu-sagsbehandler", "nexus-sagsbehandler"]:
                 self.momentum.borgere.fjern_ansvarlig_eller_privat_kontaktperson(
                     borger, eksisterende_sagsbehandler["email"]
                 )
