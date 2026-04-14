@@ -1,3 +1,4 @@
+from asyncio.log import logger
 from datetime import datetime
 from momentum_client.manager import MomentumClientManager
 from odk_tools.tracking import Tracker
@@ -63,9 +64,13 @@ class MomentumService:
             ]
             
             for markering in aktive_relevante_markeringer:
-                self.momentum.borgere.afslut_markering(
-                    markering, datetime.now().date()
-                )
+                try:
+                    self.momentum.borgere.afslut_markering(
+                        markering, datetime.now().date()
+                    )
+                except Exception as e:
+                    logger.error(f"Fejl ved afslutning af markering: {e}")
+                    continue
 
     def find_unikke_sagsbehandlere(self, data) -> list:
         """Find unikke sagsbehandlere blandt aktive børn."""
