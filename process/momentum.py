@@ -52,6 +52,7 @@ class MomentumService:
         if not har_relevant_ekstern_sagsbehandler:
             markering_navne = {
                 "Sammenhængende borgerforløb",
+                "Sammenhængende Borgerforløb - Udsatte familier",
                 "Sammenhængende borgerforløb - afventer samtykke",
                 "Sammenhængende borgerforløb - deltager IKKE",
                 "Sammenhængende borgerforløb - deltager",
