@@ -177,8 +177,8 @@ class MomentumService:
         # 2. Hent borger
         borger = self.momentum.borgere.hent_borger(data["cpr"])
         myndighedstilknytning = self.momentum.momentum_client.get(f"citizens/{borger['id']}/jobcenterAffiliations").json()
-        if myndighedstilknytning[0]["jobcenterId"] != "46101":
-            return  # Skip if the citizen is not affiliated with the specified job center
+        if myndighedstilknytning and myndighedstilknytning[0]["jobcenterId"] != "46101":
+            return  # Skip only if the citizen has an affiliation and it's not the specified job center
 
         # 3. Hent borgerens aktive sagsbehandlere
         aktive = self.momentum.borgere.hent_aktive_sagsbehandlere(borger)["data"]
