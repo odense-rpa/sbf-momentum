@@ -76,6 +76,7 @@ if __name__ == "__main__":
         client_secret=momentum_credential.password,
         api_key=momentum_credential.data["api_key"],
         resource=momentum_credential.data["resource"],
+        timeout=90.0
     )
     momentum_service = MomentumService(tracker=tracker, momentum=momentum)
 
