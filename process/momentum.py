@@ -27,7 +27,7 @@ class MomentumService:
                 m
                 for m in borgers_markeringer
                 if m["tag"]["title"] == "Sammenhængende borgerforløb"
-                and m["tag"]["end"] is None
+                and m["end"] is None
             ),
             None,
         )
