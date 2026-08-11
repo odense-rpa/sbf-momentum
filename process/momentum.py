@@ -53,15 +53,19 @@ class MomentumService:
             markering_navne = {
                 "Sammenhængende borgerforløb",
                 "Sammenhængende Borgerforløb - Udsatte familier",
+                "Sammenhængende Borgerforløb – Udsatte familier", # markering har em-dash i stedet for bindestreg
                 "Sammenhængende borgerforløb - afventer samtykke",
+                "Sammenhængende borgerforløb – afventer samtykke", # markering har em-dash i stedet for bindestreg
                 "Sammenhængende borgerforløb - deltager IKKE",
+                "Sammenhængende borgerforløb – deltager IKKE", # markering har em-dash i stedet for bindestreg
                 "Sammenhængende borgerforløb - deltager",
+                "Sammenhængende borgerforløb – deltager", # markering har em-dash i stedet for bindestreg
             }
             
             borgers_markeringer = self.momentum.borgere.hent_markeringer(borger)
             aktive_relevante_markeringer = [
                 m for m in borgers_markeringer
-                if m["tag"]["title"] in markering_navne and m["tag"]["end"] is None
+                if m["tag"]["title"] in markering_navne and m["end"] is None
             ]
             
             for markering in aktive_relevante_markeringer:
@@ -181,13 +185,20 @@ class MomentumService:
             return  # Skip only if the citizen has an affiliation and it's not the specified job center
 
         # 3. Hent borgerens aktive sagsbehandlere
+        afregn_opgave = False
         aktive = self.momentum.borgere.hent_aktive_sagsbehandlere(borger)["data"]
+        for sb in aktive:
+            if sb["responsibilityTypeName"] in ["DUBU-sagsbehandler", "Nexus-sagsbehandler"]:
+                self.momentum.borgere.fjern_ansvarlig_eller_privat_kontaktperson(borger, sb["email"])
+                afregn_opgave = True
+                # remove item from aktive list:
+                aktive = [s for s in aktive if s["email"] != sb["email"]]
+                
 
         # 4. Set med emails fra momentum (de aktive)
         aktive_emails = {sb["email"] for sb in aktive}
 
         # 5. Fjern de unikke sagsbehandlere som allerede er aktive
-        afregn_opgave = False
         for sb in unikke_sagsbehandlere:
             email = sb["email"]
             if email in aktive_emails:
